@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#29253c" />
+    <meta
+      name="description"
+      content="Jump AI slop, collect tokens and see what took out your robot at the recycling plant."
+    />
+    <title>Slop Jumpers</title>
+    <link rel="icon" type="image/png" href="/robot-icon.png" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="masthead">
+        <a class="brand" href="/" aria-label="Slop Jumpers home"
+          ><img class="brand-icon" src="/robot-icon.png" width="34" height="34" alt="" /><span
+            >SLOP<span class="brand-light">JUMPERS</span></span
+          ></a
+        ><span class="edition">SYNTHETIC CONTENT RECYCLING</span>
+      </header>
+      <main>
+        <section class="intro">
+          <div>
+            <p class="eyebrow">AI SLOP RECYCLING PLANT</p>
+            <h1>Slop Jumpers</h1>
+            <p class="lede">Jump the junk and collect tokens. One collision ends the shift.</p>
+          </div>
+          <div class="trail-stamp">
+            <span>⚙</span>
+            <div>1,500 M<small>per sorting belt</small></div>
+          </div>
+        </section>
+        <div class="player-activity" role="status" aria-live="polite">
+          <strong id="player-count">—</strong
+          ><span id="player-activity-label">players in the last 30 minutes</span
+          ><span id="player-activity-status">Loading player activity…</span>
+        </div>
+        <div class="traffic-banner" id="traffic-banner" hidden>
+          <span id="traffic-summary"></span><button id="stop-traffic" class="quiet">Stop fake runs ×</button>
+        </div>
+        <div class="layout">
+          <section class="play-column" aria-label="Runner game">
+            <div class="game-card">
+              <div class="game-toolbar">
+                <span class="live-label"><i></i><span id="system-state">READY TO BOOT</span></span
+                ><span id="mode-label">Ready for the sorting belt</span
+                ><span id="level-label" class="course-label">LEVEL 01</span>
+              </div>
+              <div class="game-stage">
+                <canvas
+                  id="trail"
+                  tabindex="0"
+                  aria-label="Robot runner. Press Space, Up, W, or tap to jump over AI slop."
+                ></canvas>
+                <div class="game-hud" id="game-hud" hidden>
+                  <div>
+                    <span id="distance">0</span><small>METRES</small><small id="speed">1.00× SPEED</small>
+                  </div>
+                  <div class="hud-secondary">
+                    <span id="tokens">0</span
+                    ><small><span class="token-symbol" aria-hidden="true">⬢</span> TOKENS</small
+                    ><span id="lives" aria-label="1 life">♥ 1 LIFE</span>
+                  </div>
+                </div>
+                <form class="start-overlay" id="profile">
+                  <h2>Clock in.</h2>
+                  <p>Guide your robot past the AI slop on the sorting belt.</p>
+                  <div class="profile-fields">
+                    <label for="nickname"
+                      >Name<input
+                        id="nickname"
+                        name="nickname"
+                        maxlength="20"
+                        placeholder="Your name"
+                        autocomplete="nickname"
+                        required
+                    /></label>
+                    <div class="profile-field">
+                      <label for="nationality">Nationality</label
+                      ><select id="nationality" name="nationality" required>
+                        <option value="">Choose nationality</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button class="primary" id="start" type="submit">Start running <span>→</span></button
+                  ><span class="start-hint">SPACE TO JUMP · OR TAP THE TRAIL</span>
+                </form>
+                <div class="finish-overlay" id="finish-overlay" hidden>
+                  <span class="trail-tag" id="finish-heading">ROBOT OFFLINE</span>
+                  <h2 id="finish-distance">0 metres.</h2>
+                  <p id="finish-hit" class="finish-hit" role="status" hidden></p>
+                  <p id="finish-detail"></p>
+                  <button class="primary" id="again">Restart game ↗</button>
+                </div>
+              </div>
+              <div class="play-controls">
+                <div class="identity">
+                  <span class="eyebrow">PILOT</span><strong id="pilot">Awaiting registration</strong>
+                </div>
+                <div class="key-hint"><kbd>SPACE</kbd><span>jump</span><span>/ tap to jump</span></div>
+                <button class="quiet" id="restart">Restart game ↻</button>
+              </div>
+            </div>
+            <section class="history-card">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">EVERY ROBOT LEAVES A MARK</p>
+                  <h2>Previous runs</h2>
+                </div>
+                <button class="quiet" id="refresh-history">Refresh ↻</button>
+              </div>
+              <div class="save-warning" id="save-warning" hidden>
+                <div role="status">
+                  <strong id="save-title"></strong>
+                  <p id="save-detail"></p>
+                </div>
+                <button class="secondary small" id="retry">Retry saves</button>
+              </div>
+              <div class="history" id="history"></div>
+              <p class="fine" id="history-message"></p>
+            </section>
+          </section>
+          <aside>
+            <section
+              class="leaderboard-card"
+              id="leaderboard-panel"
+              aria-label="Leaderboard"
+              aria-busy="false"
+            >
+              <div id="leaderboard-content">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">THE WORLD IS RUNNING</p>
+                    <h2>Leaderboard</h2>
+                  </div>
+                  <button class="round-button" id="refresh-leaderboard" aria-label="Refresh leaderboard">
+                    ↻
+                  </button>
+                </div>
+                <p class="leaderboard-intro">Best distance per pilot, with the slop that ended each run.</p>
+                <div class="leaderboard-status" id="board-status" role="status">Finding fellow robots…</div>
+                <ol class="records" id="records"></ol>
+                <div class="freshness"><i></i><span id="freshness">Waiting for first update</span></div>
+                <p class="fine">Updates every 10 seconds.</p>
+              </div>
+              <div id="leaderboard-overlay" class="leaderboard-overlay" hidden tabindex="-1">
+                <div role="status" aria-live="polite" aria-atomic="true">
+                  <span class="spinner" id="leaderboard-spinner" aria-hidden="true"></span>
+                  <h2 id="leaderboard-title"></h2>
+                  <p id="leaderboard-detail"></p>
+                </div>
+                <button class="primary" id="leaderboard-retry" hidden>Retry leaderboard</button
+                ><button class="secondary" id="recover-traffic" hidden>Stop traffic & retry</button>
+              </div>
+            </section>
+          </aside>
+        </div>
+        <footer>
+          <span>SLOP JUMPERS</span><button class="quiet" id="open-lab">Instructor Settings</button>
+        </footer>
+      </main>
+      <div
+        id="network"
+        class="network-overlay"
+        hidden
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="network-title"
+        aria-describedby="network-detail"
+        tabindex="-1"
+      >
+        <div class="network-card">
+          <span class="spinner" id="network-spinner"></span><span class="trail-tag">CONNECTION PAUSED</span>
+          <h2 id="network-title"></h2>
+          <p id="network-detail"></p>
+          <button class="primary" id="network-retry" hidden>Retry</button
+          ><button class="quiet" id="network-lab">Instructor Settings</button>
+        </div>
+      </div>
+      <dialog id="lab" aria-labelledby="instructor-settings-title">
+        <div class="dialog-heading">
+          <p class="eyebrow">OBSERVABILITY WORKSHOP</p>
+          <button class="quiet" id="close-lab" aria-label="Close Instructor Settings">×</button>
+        </div>
+        <h2 id="instructor-settings-title">Instructor Settings</h2>
+        <p>Generate traffic and compare how the game responds under load.</p>
+        <div class="lab-auth">
+          <input
+            id="workshop-token"
+            type="password"
+            placeholder="Instructor token"
+            aria-label="Instructor token"
+          /><button id="connect-lab" class="secondary">Connect</button>
+        </div>
+        <p id="lab-message" role="status">Local default: local-workshop</p>
+        <div id="lab-controls" hidden>
+          <div class="lab-presets">
+            <button class="secondary" data-preset="healthy">Normal traffic</button
+            ><button class="secondary" data-preset="lost">Lost confirmation</button>
+          </div>
+          <form id="database-form" class="fake-run-form">
+            <label for="database-connections">Database connections</label>
+            <div class="lab-row">
+              <input
+                id="database-connections"
+                type="number"
+                min="1"
+                max="32"
+                step="1"
+                value="8"
+                required
+              /><button id="apply-database" class="secondary" type="submit">Apply limit</button
+              ><button id="restore-database" class="quiet" type="button">Restore default</button>
+            </div>
+          </form>
+          <p class="fine" id="database-status" role="status"></p>
+          <div class="lab-stats" id="database-stats"></div>
+          <p class="fine">
+            Shared by rankings, run saves and player activity. Fewer connections make busy requests wait;
+            running queries finish normally. No artificial delay is added.
+          </p>
+          <form id="failure-form" class="fake-run-form">
+            <label for="failure-percent">Request failures (%)</label>
+            <div class="lab-row">
+              <input
+                id="failure-percent"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value="0"
+                required
+              /><button id="apply-failures" class="secondary" type="submit">Apply failure rate</button>
+            </div>
+          </form>
+          <p class="fine" id="failure-status" role="status">HTTP 502 fault is off.</p>
+          <p class="fine">
+            Each game API request has this chance of failing with HTTP 502 before any data changes. 0% turns
+            the fault off. Instructor controls and health checks stay available.
+          </p>
+          <div class="lab-row">
+            <button id="request-delay" type="button" class="secondary">Enable random request delay</button>
+            <span>300–1,000 ms per API request</span>
+          </div>
+          <form id="fake-run-form" class="fake-run-form">
+            <label for="fake-run-count">Number of fake runs</label>
+            <div class="lab-row">
+              <input
+                id="fake-run-count"
+                type="number"
+                min="1"
+                max="1000"
+                step="1"
+                value="20"
+                required
+              /><button class="primary" id="start-fake-runs" type="submit">Start fake runs</button
+              ><button class="secondary" id="stop-fake-runs" type="button" disabled>Stop</button>
+            </div>
+          </form>
+          <p class="fine">
+            Each robot uses its own identity and runs at normal speed until it hits a randomly chosen obstacle
+            within 8,000 metres (up to ~85 seconds plus network waits). It saves each completed level and the
+            collision. Names are randomly chosen from 10,000 realistic combinations. All requests come from
+            this browser. Closing this dialog keeps the batch running; reloading the page stops it.
+          </p>
+          <p id="fake-run-progress" class="fine" role="status" data-phase="idle">No fake runs started.</p>
+          <p id="fake-run-error" class="fine"></p>
+          <p class="fine">Simulated players refresh the leaderboard every 10 seconds while playing.</p>
+          <section class="stored-data" aria-labelledby="data-heading">
+            <div class="section-heading">
+              <h3 id="data-heading">Stored data</h3>
+              <button id="refresh-data" class="secondary" type="button">Refresh counts</button>
+            </div>
+            <div class="lab-stats" id="data-stats"></div>
+            <p class="fine" id="data-count-status" role="status">Connect to load database counts.</p>
+            <p class="fine">
+              Rankings contain each player’s best saved distance above 0 m. Recent players also include newly
+              started runs without saved progress.
+            </p>
+            <form id="seed-form" class="fake-run-form">
+              <label for="seed-count">Number of runs to seed</label>
+              <div class="lab-row">
+                <input
+                  id="seed-count"
+                  type="number"
+                  min="1"
+                  max="10000"
+                  step="1"
+                  value="1000"
+                  required
+                /><button id="seed-runs" class="primary" type="submit">Add fake runs to database</button>
+              </div>
+            </form>
+            <p class="fine">
+              Adds finished runs immediately with realistic names. Most robots crash on the first belt, with
+              rare runs reaching farther. Seeded players appear in rankings but do not count as playing in the
+              last 30 minutes.
+            </p>
+            <div class="lab-row">
+              <button id="remove-fake-runs" class="secondary" type="button">Remove all fake runs</button>
+            </div>
+            <p class="fine">
+              Removes only fake runs marked by these new tools, including their checkpoints. All previously
+              stored runs and ordinary player runs are protected. Stops this browser’s batch first; stop other
+              traffic generators before clearing.
+            </p>
+            <p id="data-message" class="fine" role="status"></p>
+          </section>
+          <div class="lab-row">
+            <label><input type="checkbox" id="autoplay" /> Autoplay the next run</label>
+          </div>
+          <div class="lab-stats" id="lab-stats"></div>
+          <p class="fine" id="capacity-note"></p>
+          <button class="quiet" id="reset">Reset faults and stop traffic</button>
+        </div>
+      </dialog>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

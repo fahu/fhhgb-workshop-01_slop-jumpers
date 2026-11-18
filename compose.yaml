@@ -1,0 +1,44 @@
+name: slop-jumpers
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:${APP_PORT:-8090}:8080"
+    environment:
+      PORT: "8080"
+      DATABASE_URL: "jdbc:postgresql://db:5432/${DATABASE_NAME:-slop_jumpers}"
+      DATABASE_USERNAME: "${DATABASE_USERNAME:-slop_jumpers}"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD:-local-slop-jumpers}"
+      DATABASE_CONNECTIONS: "${DATABASE_CONNECTIONS:-8}"
+      DATABASE_WAIT_MS: "${DATABASE_WAIT_MS:-1500}"
+      WORKSHOP_TOKEN: "${WORKSHOP_TOKEN:-local-workshop}"
+      LEADERBOARD_WORKERS: "${LEADERBOARD_WORKERS:-2}"
+      LEADERBOARD_QUEUE: "${LEADERBOARD_QUEUE:-8}"
+      LEADERBOARD_DEADLINE_MS: "${LEADERBOARD_DEADLINE_MS:-1500}"
+      SEED_SIZE: "${SEED_SIZE:-0}"
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    mem_limit: 768m
+  db:
+    image: postgres:18.7-bookworm
+    environment:
+      POSTGRES_DB: "${DATABASE_NAME:-slop_jumpers}"
+      POSTGRES_USER: "${DATABASE_USERNAME:-slop_jumpers}"
+      POSTGRES_PASSWORD: "${DATABASE_PASSWORD:-local-slop-jumpers}"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "${DATABASE_USERNAME:-slop_jumpers}", "-d", "${DATABASE_NAME:-slop_jumpers}"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+volumes:
+  postgres-data:

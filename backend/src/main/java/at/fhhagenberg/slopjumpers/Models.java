@@ -1,0 +1,55 @@
+package at.fhhagenberg.slopjumpers;
+
+import jakarta.validation.constraints.*;
+import java.util.List;
+
+public final class Models {
+    private Models() {}
+
+    public record Start(@NotBlank @Size(max = 20) String alias,
+                        @NotBlank @Pattern(regexp = "[a-fA-F0-9-]{36}") String playerId,
+                        @NotBlank @Pattern(regexp = "[A-Z]{2}") String nationalityCode, Boolean fake) {}
+    public record Progress(@Min(0) @Max(1000000) int distance,
+                           @Min(0) @Max(1000000) int tokens,
+                           @Min(0) @Max(100000000) long elapsedMs,
+                           @Size(max = 32) String collisionId) {}
+    public record Run(String id, String playerId, String alias, int distance, int tokens,
+                      long elapsedMs, boolean finished, long createdAt,
+                      String nationalityCode, String courseVersion, int levelLength, String fakeSource,
+                      String collisionId) {}
+    public record PlayerProfile(String playerId, String alias, String nationalityCode) {}
+    public record Receipt(int distance, int checkpoint, boolean duplicate, boolean finished) {}
+    public record Nationality(String code, String name) {}
+    public record Leader(String alias, int distance, int tokens, Nationality nationality, boolean finished, String collisionId) {}
+    public record Leaderboard(long generatedAt, List<Leader> entries) {}
+    public record LeaderboardStatus(int active, int queued, long builds, long rejected, int workers, int deadlineMs) {}
+    public record PlayerActivity(long players, int windowMinutes, long asOf) {}
+    public record DatabaseLimit(@Min(1) @Max(32) int maxConnections) {}
+    public record DatabasePool(int maxConnections, int defaultConnections, int active, int idle,
+                               int total, int waiting, long connectionTimeoutMs) {}
+    public record Obstacle(double distance, double width, double height, String slopId) {}
+    public record Star(int id, double distance, double height) {}
+    public record Level(int number, String courseVersion, int start, int end,
+                        List<Obstacle> obstacles, List<Star> stars) {}
+    public record RunCounts(long totalRuns, long rankedPlayers, long recentPlayers, long startedOnlyRuns,
+                            long removableFakeRuns, long protectedRuns) {}
+    public record RemovedRuns(int runs, int checkpoints) {}
+    public record Seed(@Min(1) @Max(10000) int count) {}
+    public record Scenario(boolean loseConfirmation,
+                           @Min(0) @Max(100) Integer requestFailurePercent,
+                           Boolean randomRequestDelay) {
+        public Scenario(boolean loseConfirmation, int requestFailurePercent) {
+            this(loseConfirmation, requestFailurePercent, false);
+        }
+
+        public Scenario {
+            // Omitted settings default to their healthy values.
+            if (requestFailurePercent == null) {
+                requestFailurePercent = 0;
+            }
+            randomRequestDelay = Boolean.TRUE.equals(randomRequestDelay);
+        }
+    }
+
+    public record ScenarioUpdate(@Min(0) @Max(100) Integer requestFailurePercent, Boolean randomRequestDelay) {}
+}
